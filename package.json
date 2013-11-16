@@ -7,8 +7,10 @@
   },
   "dependencies": {
     "express": "3.4.4",
+    "express-validator": "1.0.0",
     "mongoose": "*",
     "jade": "*",
-    "mongoose-timestamp" : "*"
+    "mongoose-timestamp": "*",
+    "underscore": "1.5.2"
   }
 }

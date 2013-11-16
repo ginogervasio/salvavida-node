@@ -2,6 +2,21 @@ var express = require('express');
 var http = require('http');
 var path = require('path');
 var mongoose = require('mongoose');
+var expressValidator = require('express-validator');
+expressValidator.Filter.prototype.toLowerCase = function(){
+  this.modify(this.str.toLowerCase());
+  return this.str;
+};
+var Feed = require('./models/feed');
+// custom validator for state
+expressValidator.Validator.prototype.isValidState = function() {
+  if (this.str.toLowerCase() != Feed.STATE_OPEN && 
+      this.str.toLowerCase() != Feed.STATE_CLOSED)
+  {
+    this.error("state can be either '"+Feed.STATE_OPEN+"' or '"+Feed.STATE_CLOSED+"'");
+  }
+  return this;
+};
 
 var app = express();
 
@@ -11,9 +26,6 @@ global.config = config;
 
 // connect to the database
 mongoose.connect(config.mongoUrl);
-
-// load routes
-var routes = require('./routes');
 
 // all environments
 app.set('port', process.env.PORT || 3000);
@@ -25,6 +37,7 @@ app.use(express.json());
 app.use(express.urlencoded());
 app.use(express.methodOverride());
 app.use(express.bodyParser());
+app.use(expressValidator());
 app.use(express.cookieParser());
 app.use(express.session({ secret: config.sessionSecret }));
 app.use(app.router);
@@ -39,8 +52,8 @@ else
   app.use(express.errorHandler()); 
 }
 
-// Routes
-// app.get('/', routes.index);
+// routers
+var apiRouter = require('./routes/api')(app);
 
 // Start server
 http.createServer(app).listen(app.get('port'), function(){
