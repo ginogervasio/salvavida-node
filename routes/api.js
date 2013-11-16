@@ -53,6 +53,8 @@ var router = function(app) {
   });
 
   app.get('/feed', function(req,res) {
+    var FEED_LIMIT = 1000;
+
     req.assert('state').notEmpty().isValidState();
 
     var errors = req.validationErrors();
@@ -78,11 +80,10 @@ var router = function(app) {
         distance = req.query.distance;
       }
       Feed.geoNear({ type : "Point", coordinates : coordinates }, 
-                   { maxDistance : distance, spherical : true }, 
-                   feedsFound);
+                   { maxDistance : distance, spherical : true }).limit(FEED_LIMIT).exec(feedsFound);
     } else {
       // normal find all query
-      Feed.find({state:req.query.state}, feedsFound);
+      Feed.find({state:req.query.state}).limit(FEED_LIMIT).exec(feedsFound);
     }
   })
 };
